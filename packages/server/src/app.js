@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import { signup, signin, isAuthenticated } from './utils/auth';
+import trackRoutes from './resources/track/track.routes';
 
 const app = express();
 
@@ -16,8 +17,6 @@ app.post('/signin', signin);
 // Apply isAuthenticated middleware
 app.use(isAuthenticated);
 
-app.get('/', (req, res) => {
-  res.send('You are authenticated ' + req.user.email);
-});
+app.use('/api/tracks', trackRoutes);
 
 export default app;

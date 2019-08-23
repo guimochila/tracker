@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { isEmail, isEmpty, isLength } from 'validator';
 import User from '../resources/user/user.model';
-import { throwError } from 'rxjs';
 
 export const signup = async (req, res) => {
   const { email, password, name } = req.body;
