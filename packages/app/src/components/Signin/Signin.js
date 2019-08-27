@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
 import { Text, Button } from 'react-native-elements';
+import { Alert } from 'react-native';
 
 import FormInput from '../FormInput';
 
-const Signup = ({ error, onSubmit, cleanError }) => {
-  const [name, setName] = useState('');
+const Signin = ({ onSubmit, cleanError, error }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -16,16 +15,7 @@ const Signup = ({ error, onSubmit, cleanError }) => {
 
   return (
     <>
-      <Text h3>Sign up for Tracker</Text>
-      <FormInput
-        label="Name"
-        handleChange={setName}
-        icon={{ type: 'font-awesome', name: 'user' }}
-        value={name}
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-
+      <Text h3>Sign In</Text>
       <FormInput
         label="Email"
         handleChange={setEmail}
@@ -45,12 +35,9 @@ const Signup = ({ error, onSubmit, cleanError }) => {
         secureTextEntry
       />
 
-      <Button
-        title="Sign Up"
-        onPress={() => onSubmit({ name, email, password })}
-      />
+      <Button title="Sign In" onPress={() => onSubmit({ email, password })} />
     </>
   );
 };
 
-export default Signup;
+export default Signin;
