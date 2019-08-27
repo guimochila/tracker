@@ -10,8 +10,16 @@ export const _storeData = async (key, data) => {
 
 export const _getData = async key => {
   try {
-    const value = await AsyncStorage.getItem(key);
-    if (value === null) return;
+    const value = await AsyncStorage.getItem(`@Tracker:${key}`);
+    return value || null;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const _removeData = async key => {
+  try {
+    return await AsyncStorage.removeItem(`@Tracker:${key}`);
   } catch (error) {
     console.log(error);
   }
