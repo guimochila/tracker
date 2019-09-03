@@ -1,17 +1,19 @@
 // Catch Error Handler
 export const catchErrors = fn => {
-  return function(req, res, next) {
+  return function wrapFunc(req, res, next) {
     return fn(req, res, next).catch(next);
   };
 };
 
 // Development Error Handler
 export const developmentErrors = (err, req, res, next) => {
-  err.stack = err.stack || '';
+  const error = err;
+
+  error.stack = err.stack || '';
   const errorDetails = {
-    message: err.message,
-    status: err.status,
-    stack: err.stack,
+    message: error.message,
+    status: error.status,
+    stack: error.stack,
   };
 
   res.status(err.status || 500).json(errorDetails);

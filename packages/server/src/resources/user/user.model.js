@@ -43,7 +43,7 @@ userSchema.pre('save', async function hashPassword(next) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
     user.password = hash;
-    next();
+    return next();
   } catch (error) {
     return next(error);
   }

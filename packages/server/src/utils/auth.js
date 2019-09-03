@@ -26,13 +26,12 @@ export const signup = async (req, res) => {
       process.env.SECRET_KEY,
     );
 
-    res.send({ token });
+    return res.send({ token });
   } catch (error) {
     if (error.message.includes('duplicate key error')) {
-      res.status(422).json({ error: 'Email is already in use' });
-    } else {
-      res.status(500).json({ error: error.message });
+      return res.status(422).json({ error: 'Email is already in use' });
     }
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -41,7 +40,7 @@ const verifyToken = token => {
     jwt.verify(token, process.env.SECRET_KEY, (err, payload) => {
       if (err) return reject(err);
 
-      resolve(payload);
+      return resolve(payload);
     });
   });
 };
@@ -58,7 +57,7 @@ export const isAuthenticated = async (req, res, next) => {
     const payload = await verifyToken(token);
 
     req.user = payload;
-    next();
+    return next();
   } catch (error) {
     return res.status(401).json({ error: error.message });
   }
