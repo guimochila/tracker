@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const connect = (url = process.env.DATABASE_URI, opts = {}) => {
+export default (url = process.env.DATABASE_URI, opts = {}) => {
   // Setting connection listeners for any error
   mongoose.connection.on('error', error =>
     console.error(`🙅‍♀️ 🚒 -> ${error.message}`),
