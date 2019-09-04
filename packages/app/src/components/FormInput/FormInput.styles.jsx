@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-export const inputStyles = StyleSheet.create({
+const inputStyles = StyleSheet.create({
   marginBottom: 30,
 });
+export default inputStyles;
