@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import * as Location from 'expo-location';
 
 const tenMetersWithDregrees = 0.0001;
@@ -23,5 +24,5 @@ setInterval(() => {
     location: getLocation(counter),
   });
 
-  counter++;
+  counter += 1;
 }, 1000);
