@@ -1,6 +1,7 @@
-import jwt from 'jsonwebtoken';
+import jwt, { sign, verify } from 'jsonwebtoken';
 import { isEmail, isEmpty, isLength } from 'validator';
-import User from '../resources/user/user.model';
+
+import User from '../types/user/user.model';
 
 export const signup = async (req, res) => {
   const { email, password, name } = req.body;
@@ -21,10 +22,7 @@ export const signup = async (req, res) => {
 
   try {
     const user = await User.create({ name, email, password });
-    const token = jwt.sign(
-      { userId: user.id, name: user.name, email: user.email },
-      process.env.SECRET_KEY,
-    );
+    const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY);
 
     return res.send({ token });
   } catch (error) {
@@ -35,9 +33,17 @@ export const signup = async (req, res) => {
   }
 };
 
+export const generateToken = (user, expiresIn) => {
+  return sign(
+    { userId: user.id, count: user.tokenCount },
+    process.env.SECRET_KEY,
+    { expiresIn },
+  );
+};
+
 const verifyToken = token => {
   return new Promise((resolve, reject) => {
-    jwt.verify(token, process.env.SECRET_KEY, (err, payload) => {
+    verify(token, process.env.SECRET_KEY, (err, payload) => {
       if (err) return reject(err);
 
       return resolve(payload);
@@ -46,20 +52,43 @@ const verifyToken = token => {
 };
 
 export const isAuthenticated = async (req, res, next) => {
-  const { authorization } = req.headers;
+  const { accessToken, refreshToken } = req.cookies;
 
-  if (!authorization) {
-    return res.status(401).json({ error: 'You must be logged in' });
+  if (!accessToken && !refreshToken) {
+    return next();
   }
 
-  const token = authorization.replace('Bearer ', '');
   try {
-    const payload = await verifyToken(token);
-
-    req.user = payload;
+    const { userId } = await verifyToken(accessToken);
+    req.userId = userId;
     return next();
-  } catch (error) {
-    return res.status(401).json({ error: error.message });
+  } catch {
+    /* 
+      In case the accessToken is expired or invalid,
+      we check if the refreshToken is valid, if so
+      we generate new refreshToken and accessToken.
+    */
+    const data = await verifyToken(refreshToken);
+    const user = await User.findOne({ _id: data.userId });
+
+    /* 
+      If there is no user in the data base, we call next();
+      user.tokenCount is the mechanism we use to
+      check if the refreshToken is sync with DB, in case is
+      not we call next()
+    */
+    if (!user || user.tokenCount !== data.count) {
+      return next();
+    }
+
+    const newRefreshToken = generateToken(user, '7d');
+    const newAccessToken = generateToken(user, '15min');
+    req.userId = user.id;
+
+    res.cookie('refreshToken', newRefreshToken);
+    res.cookie('accessToken', newAccessToken);
+
+    return next();
   }
 };
 
