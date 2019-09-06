@@ -23,6 +23,10 @@ const userSchema = new Schema(
       maxlength: 30,
       minlength: 6,
     },
+    tokenCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: {

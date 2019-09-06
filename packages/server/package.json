@@ -11,16 +11,25 @@
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "apollo-server-express": "^2.9.3",
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.4",
     "dotenv": "^8.1.0",
     "esm": "^3.2.25",
     "express": "^4.17.1",
+    "graphql": "^14.5.4",
+    "graphql-cli": "^3.0.14",
+    "graphql-import": "^0.7.1",
     "helmet": "^3.20.0",
     "jsonwebtoken": "^8.5.1",
+    "merge-graphql-schemas": "^1.7.0",
     "mongoose": "^5.6.10",
     "validator": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
+  },
+  "nodemonConfig": {
+    "ext": "js, graphql"
   }
 }
