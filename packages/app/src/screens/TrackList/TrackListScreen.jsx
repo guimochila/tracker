@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import React, { useContext } from 'react';
 import { Text, FlatList, TouchableOpacity } from 'react-native';
 import { ListItem } from 'react-native-elements';
