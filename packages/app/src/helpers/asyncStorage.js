@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
 import { AsyncStorage } from 'react-native';
 
 export const _storeData = async (key, data) => {
