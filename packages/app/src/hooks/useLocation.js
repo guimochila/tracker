@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 import { useState, useEffect } from 'react';
 import {
   Accuracy,
