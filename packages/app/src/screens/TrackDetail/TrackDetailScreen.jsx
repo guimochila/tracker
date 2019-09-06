@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+/* eslint-disable no-underscore-dangle */
 import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
 import MapView, { Polyline } from 'react-native-maps';
