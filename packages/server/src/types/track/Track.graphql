@@ -1,0 +1,43 @@
+type Query {
+  myTracks: [Track]
+}
+
+type Mutation {
+  addTrack(name: String, locations: [PointsInput]): Track
+}
+
+input CoordsInput {
+  latitude: Int
+  longitude: Int
+  altitude: Int
+  accuracy: Int
+  heading: Int
+  speed: Int
+}
+
+type Coords {
+  latitude: Int
+  longitude: Int
+  altitude: Int
+  accuracy: Int
+  heading: Int
+  speed: Int
+}
+
+input PointsInput {
+  coords: CoordsInput
+}
+
+type Points {
+  timestamp: String
+  coords: Coords
+}
+
+type Track {
+  id: ID!
+  userId: User!
+  name: String!
+  locations: [Points]!
+  createdAt: String
+  updatedAt: String
+}
