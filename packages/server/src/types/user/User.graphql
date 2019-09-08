@@ -1,0 +1,27 @@
+type Query {
+  me: User
+}
+
+type Mutation {
+  signin(email: String!, password: String!): User!
+  signup(input: UserInput!): User!
+  signout: SuccessMessage!
+}
+
+type User {
+  id: ID
+  email: String
+  name: String
+  createdAt: String
+  updatedAt: String
+}
+
+input UserInput {
+  email: String
+  name: String
+  password: String
+}
+
+type SuccessMessage {
+  message: String
+}

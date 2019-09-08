@@ -1,43 +1,18 @@
-import jwt from 'jsonwebtoken';
-import { isEmail, isEmpty, isLength } from 'validator';
-import User from '../resources/user/user.model';
+import { sign, verify } from 'jsonwebtoken';
 
-export const signup = async (req, res) => {
-  const { email, password, name } = req.body;
+import User from '../types/user/user.model';
 
-  if (!name || isEmpty(name)) {
-    return res.status(400).json({ error: 'You must provide a name' });
-  }
-
-  if (!email || !isEmail(email)) {
-    return res.status(400).json({ error: 'You must provide a valid email' });
-  }
-
-  if (!isLength(password, { min: 6, max: 30 })) {
-    return res
-      .status(400)
-      .json({ error: 'Password must have between 6 and 30 characters' });
-  }
-
-  try {
-    const user = await User.create({ name, email, password });
-    const token = jwt.sign(
-      { userId: user.id, name: user.name, email: user.email },
-      process.env.SECRET_KEY,
-    );
-
-    return res.send({ token });
-  } catch (error) {
-    if (error.message.includes('duplicate key error')) {
-      return res.status(422).json({ error: 'Email is already in use' });
-    }
-    return res.status(500).json({ error: error.message });
-  }
+export const generateToken = (user, expiresIn) => {
+  return sign(
+    { userId: user.id, count: user.tokenCount },
+    process.env.SECRET_KEY,
+    { expiresIn },
+  );
 };
 
 const verifyToken = token => {
   return new Promise((resolve, reject) => {
-    jwt.verify(token, process.env.SECRET_KEY, (err, payload) => {
+    verify(token, process.env.SECRET_KEY, (err, payload) => {
       if (err) return reject(err);
 
       return resolve(payload);
@@ -46,50 +21,42 @@ const verifyToken = token => {
 };
 
 export const isAuthenticated = async (req, res, next) => {
-  const { authorization } = req.headers;
+  const { accessToken, refreshToken } = req.cookies;
 
-  if (!authorization) {
-    return res.status(401).json({ error: 'You must be logged in' });
-  }
-
-  const token = authorization.replace('Bearer ', '');
-  try {
-    const payload = await verifyToken(token);
-
-    req.user = payload;
+  if (!accessToken && !refreshToken) {
     return next();
-  } catch (error) {
-    return res.status(401).json({ error: error.message });
-  }
-};
-
-export const signin = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password || !isEmail(email)) {
-    return res
-      .status(422)
-      .json({ error: 'You must provide an email and password' });
-  }
-
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    return res.status(401).json({ error: 'Invalid email or password' });
   }
 
   try {
-    const isPasswordValid = await user.comparePassword(password);
+    const { userId } = await verifyToken(accessToken);
+    req.userId = userId;
+    return next();
+  } catch {
+    /* 
+      In case the accessToken is expired or invalid,
+      we check if the refreshToken is valid, if so
+      we generate new refreshToken and accessToken.
+    */
+    const data = await verifyToken(refreshToken);
+    const user = await User.findOne({ _id: data.userId });
 
-    if (!isPasswordValid) throw Error;
+    /* 
+      If there is no user in the data base, we call next();
+      user.tokenCount is the mechanism we use to
+      check if the refreshToken is sync with DB, in case is
+      not we call next()
+    */
+    if (!user || user.tokenCount !== data.count) {
+      return next();
+    }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, name: user.name },
-      process.env.SECRET_KEY,
-    );
+    const newRefreshToken = generateToken(user, '7d');
+    const newAccessToken = generateToken(user, '15min');
+    req.userId = user.id;
 
-    return res.json({ token });
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+    res.cookie('refreshToken', newRefreshToken);
+    res.cookie('accessToken', newAccessToken);
+
+    return next();
   }
 };
